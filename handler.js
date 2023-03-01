@@ -1,6 +1,12 @@
 'use strict';
 const DynamoDB = require("aws-sdk/clients/dynamodb"), // installed in node_modules aws-sdk@2
-documentClient = new DynamoDB.DocumentClient({ region: 'us-east-1' });
+documentClient = new DynamoDB.DocumentClient({
+  region: 'us-east-1',
+  maxRetries: 3,
+  httpOptions: {
+    timeout: 5000,
+  },
+});
 const NOTES_TABLE_NAME = process.env.NOTES_TABLE_NAME // set in the .yml
 
 const send = (statusCode, data) => {
@@ -11,6 +17,7 @@ const send = (statusCode, data) => {
 }
 
 module.exports.createNote = async (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false; // dont wait for other Lambda functions to complete
   let data = JSON.parse(event.body)
   try {
     const params = {
@@ -23,7 +30,6 @@ module.exports.createNote = async (event, context, callback) => {
       ConditionExpression: "attribute_not_exists(notesId)" // checks if there is no existing note first
     }
     await documentClient.put(params).promise() // store in notes table
-
     callback(null, send(201, data))
   } catch(err) {
     callback(null, send(500, err.message))
@@ -32,6 +38,7 @@ module.exports.createNote = async (event, context, callback) => {
 
 //API gateway will extract the note's id in the request with pathParameters
 module.exports.updateNote = async (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
   const notesId = event.pathParameters.id;
   const data = JSON.parse(event.body);
   try {
@@ -59,6 +66,7 @@ module.exports.updateNote = async (event, context, callback) => {
 
 
 module.exports.deleteNote = async (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
   const notesId = event.pathParameters.id;
   try {
     const params = {
@@ -75,6 +83,7 @@ module.exports.deleteNote = async (event, context, callback) => {
 };
 
 module.exports.getAllNotes = async (event, context, callback) => {
+  context.callbackWaitsForEmptyEventLoop = false;
   try {
     const params = {
       TableName : NOTES_TABLE_NAME,
