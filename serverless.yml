@@ -12,6 +12,9 @@ provider:
   region: us-east-1
 
 functions:
+  authorizer:
+    handler: authorizer.handler
+
   createNote:
     handler: handler.createNote
     environment:
@@ -27,6 +30,8 @@ functions:
       - http:
           method: post
           path: notes
+          ## associated the authorizer to the base authorizer above
+          authorizer: authorizer
   updateNote:
     handler: handler.updateNote
     environment:
@@ -42,6 +47,7 @@ functions:
       - http:
           method: put
           path: notes/{id}
+          authorizer: authorizer
   deleteNote:
     handler: handler.deleteNote
     environment:
@@ -57,6 +63,7 @@ functions:
       - http:
           method: delete
           path: notes/{id}
+          authorizer: authorizer
   getAllNotes:
     handler: handler.getAllNotes
     environment:
@@ -72,6 +79,7 @@ functions:
       - http:
           method: get
           path: notes
+          authorizer: authorizer
 # you can add CloudFormation resource templates here
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
 plugins:
