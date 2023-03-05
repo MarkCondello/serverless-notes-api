@@ -4,16 +4,16 @@ const generatePolicy = (principalId, effect, resource) => {
 
   if (effect && resource) {
     let policyDocument = {
-      "Version": "2012-10-17",
-      "Statement": [
+      Version: "2012-10-17",
+      Statement: [
         {
-          "Effect": effect,
-          "Resource": resource,
-          "Action": "execute-api:Invoke",
-        }
-      ]
+          Effect: effect,
+          Resource: resource,
+          Action: "execute-api:Invoke",
+        },
+      ],
     }
-    authResponse.authResponse = policyDocument
+    authResponse.policyDocument = policyDocument
   }
   // we can pass additional data to the authorizer lambda
   authResponse.context = {
